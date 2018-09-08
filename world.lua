@@ -38,6 +38,7 @@ function World:__init(width, height)
   self.lifesPlayer2 = 3
   
   self.animFactor = 1
+  self.leftPlate = true
   
   self.showSauce = 0
   
@@ -91,10 +92,12 @@ function World:updateGame(dt)
     self.gameState = "p1_lost_life_plate"
     if x1 < gBorder then
       self.animFactor = -1
+      self.leftPlate = true
       self.target1 = self.targetLeft1
       self.target2 = self.targetLeft2
     else
       self.animFactor = 1
+      self.leftPlate = false
       self.target1 = self.targetRight1
       self.target2 = self.targetRight2
     end
@@ -102,10 +105,12 @@ function World:updateGame(dt)
     self.gameState = "p2_lost_life_plate"
     if x2 < gBorder then
       self.animFactor = -1
+      self.leftPlate = true
       self.target1 = self.targetLeft1
       self.target2 = self.targetLeft2
     else
       self.animFactor = 1
+      self.leftPlate = false
       self.target1 = self.targetRight1
       self.target2 = self.targetRight2
     end
@@ -126,7 +131,11 @@ function World:update(dt)
       self.showSauce = 10
     end
   elseif self.gameState == "p1_lost_life_out" then
-    self.plate1:moveBy(self.animFactor * 4, -4)
+    if self.leftPlate == true then
+      self.plate1:moveBy(self.animFactor * 4, -4)
+    else
+      self.plate2:moveBy(self.animFactor * 4, -4)
+    end
     if self.player1:moveToPos(self.target2) then
       self.lifesPlayer1 = self.lifesPlayer1 - 1
       if self.lifesPlayer1 < 1 then
@@ -137,7 +146,11 @@ function World:update(dt)
       end
     end
   elseif self.gameState == "p2_lost_life_out" then
-    self.plate2:moveBy(self.animFactor * 4, -4)
+    if self.leftPlate == true then
+      self.plate1:moveBy(self.animFactor * 4, -4)
+    else
+      self.plate2:moveBy(self.animFactor * 4, -4)
+    end
     if self.player2:moveToPos(self.target2) then
       self.lifesPlayer2 = self.lifesPlayer2 - 1
       if self.lifesPlayer2 < 1 then
