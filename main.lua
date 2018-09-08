@@ -9,6 +9,9 @@ gMenuDir = 1
 function init()
 	gWorld = World:new(1920,1080)	
 	math.randomseed(4)
+  
+  startImg = love.graphics.newImage("gfx/HowToPlay.png")
+  startQuad = love.graphics.newQuad(0, 0, startImg:getWidth(), startImg:getHeight(), startImg:getWidth(), startImg:getHeight())
 end
 
 function love.load()
@@ -31,8 +34,10 @@ end
 
 function love.draw()
 	if gGameState == 0 then
+    love.graphics.draw(startImg, startQuad, 0, 0)
+    
 		love.graphics.setColor(gMenuColor, 255 - gMenuColor, 0, 255)
-    love.graphics.print("Press space to start", 1920/3, 500, 0, 4, 4)
+    love.graphics.print("Press space to start", 1920/3, 900, 0, 4, 4)
 	elseif gGameState == 1 then
 		gWorld:draw()
 	end
