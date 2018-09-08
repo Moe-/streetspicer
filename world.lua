@@ -151,10 +151,10 @@ function World:draw()
     love.graphics.print("Player 2 wins", 2*self.screenWidth/5, self.screenHeight/4, 0, 4, 4)
   else
     for i = 1, self.lifesPlayer1 do
-      love.graphics.draw(self.player1.sausageImg, self.player1.sausageQuad, self.screenWidth/6 + i * 150, 50)
+      love.graphics.draw(self.player1.sausageImg, self.player1.sausageQuad, self.screenWidth/8 + i * 150, 50)
     end
     for i = self.lifesPlayer2, 1, -1 do
-      love.graphics.draw(self.player2.sausageImg, self.player2.sausageQuad, 5 * self.screenWidth/6 - i * 150, 50, 0, -1, 1)
+      love.graphics.draw(self.player2.sausageImg, self.player2.sausageQuad, 7 * self.screenWidth/8 - i * 150, 50, 0, -1, 1)
     end
   end
 end
