@@ -98,7 +98,7 @@ end
 function Sausage:pressLeft(enemy)
   if self.state == "walk" then
     enemyRight = true
-    if self.posX > enemy.posX then
+    if self.posX + sausageSize/2 > enemy.posX then
       enemyRight = false
     end
     if self.lookRight == false and enemyRight == false then
@@ -164,7 +164,6 @@ function Sausage:getAnimFrame()
   else
     idx = idleFrames - self.subframes - 2
   end
-  print(idx)
   return idx
 end
 
