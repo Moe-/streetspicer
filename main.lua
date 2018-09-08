@@ -34,6 +34,7 @@ end
 
 function love.draw()
 	if gGameState == 0 then
+    love.graphics.setColor(255, 255, 255, 255)
     love.graphics.draw(startImg, startQuad, 0, 0)
     
 		love.graphics.setColor(gMenuColor, 255 - gMenuColor, 0, 255)
