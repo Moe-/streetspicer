@@ -9,12 +9,14 @@ gSoundHit2 = love.audio.newSource("sfx/hit2.wav", "static")
 gSoundHit3 = love.audio.newSource("sfx/hit3.wav", "static")
 gSoundKick = love.audio.newSource("sfx/strong_kick.wav", "static")
 
+sausageSize = 256
+
 -- entry: length, x-delta mov, y-delta mov
-StepPhases = {{2, -2, 0}, {0, -2, 0}, {2, -2, 0}}
-BackPhases = {{3, -2, -8}, {3, 0, 0}, {3, 2, 8}}
-ForwardPhases = {{3, 2, -8}, {3, 0, 0}, {3, -2, 8}}
-HeavyPhases = {{4, 4, 0}, {4, 4, 0}, {6, 4, 0}}
-idleFrames = 8
+StepPhases = {{3, -2, 0}, {5, -2, 0}, {4, -2, 0}}
+BackPhases = {{3, -2, 22}, {10, 0, 0}, {11, 2, -6}}
+ForwardPhases = {{3, 2, -22}, {10, 0, 0}, {11, -2, 6}}
+HeavyPhases = {{7, 4, 0}, {6, 4, 0}, {35, 4, 0}}
+idleFrames = 24
 function Sausage:__init(posX, posY, player)	
 	self.state = "walk"
   self.substate = "none"
@@ -29,17 +31,18 @@ function Sausage:__init(posX, posY, player)
   
   if player == 1 then
     self.sausageImg = love.graphics.newImage("gfx/sausage_white.png")
+    self.sausageQuad = love.graphics.newQuad(0, 0, sausageSize, sausageSize, self.sausageImg:getWidth(), self.sausageImg:getHeight())
+    self.red = false
     self.lookRight = true
   else
     self.sausageImg = love.graphics.newImage("gfx/sausage_red.png")
+    self.sausageQuad = love.graphics.newQuad(0, sausageSize, sausageSize, sausageSize, self.sausageImg:getWidth(), self.sausageImg:getHeight())
+    self.red = true
     self.lookRight = false
   end
   
-  self.posX = posX + self.sausageImg:getWidth() / 2
-	self.posY = posY - self.sausageImg:getHeight() + self.sausageImg:getHeight() / 2
-  
-  self.sausageQuad = love.graphics.newQuad(0, 0, self.sausageImg:getWidth(), self.sausageImg:getHeight(), self.sausageImg:getWidth(), self.sausageImg:getHeight())
-
+  self.posX = posX - sausageSize / 2
+	self.posY = posY - sausageSize / 2
 end
 
 function Sausage:update(dt, enemy)
@@ -79,7 +82,7 @@ function Sausage:update(dt, enemy)
     end
   else
     if self.subframes < 0 then
-      self.subframes = idleFrames
+      self.subframes = idleFrames - 1
     end
   end
   
@@ -143,22 +146,86 @@ function Sausage:pressRight(enemy)
 end
 
 function Sausage:draw()
-  drawOffsetX = -self.sausageImg:getWidth() / 2
-  drawOffsetY = -self.sausageImg:getHeight() / 2
+  drawOffsetX = -sausageSize / 2
+  drawOffsetY = -sausageSize / 2
   
-  if self.lookRight then
-    love.graphics.draw(self.sausageImg, self.sausageQuad, self.posX + drawOffsetX, self.posY + drawOffsetY)
+  local quadTile = love.graphics.newQuad(self:getAnimFrame() * sausageSize, self:getAnimRow() * sausageSize, sausageSize, sausageSize, self.sausageImg:getWidth(), self.sausageImg:getHeight())
+  love.graphics.draw(self.sausageImg, quadTile, self.posX + drawOffsetX, self.posY + drawOffsetY)
+end
+
+function Sausage:getAnimFrame()
+  if self.phases == nil then return 0 end
+  local idx = 0
+  if self.state ~= "walk" then
+    for i = 1, self.substateIdx - 1 do
+      idx = idx + self.phases[i][1]
+    end
+    idx = idx + (self.phases[self.substateIdx][1] - self.subframes) - 1
   else
-    love.graphics.draw(self.sausageImg, self.sausageQuad, self.posX + drawOffsetX, self.posY + drawOffsetY, 0, -1, 1)
+    idx = idleFrames - self.subframes - 2
+  end
+  print(idx)
+  return idx
+end
+
+function Sausage:getAnimRow()
+  if self.red == true then
+    if self.state == "walk" then
+      if self.lookRight == true then
+        return 6
+      else
+        return 7
+      end
+    elseif self.state == "heavy" then
+      if self.lookRight == true then
+        return 0
+      else
+        return 1
+      end
+    elseif self.state == "step" then
+      if self.lookRight == true then
+        return 2
+      else
+        return 3
+      end
+    elseif self.state == "forward" then
+      return 4
+    elseif self.state == "back" then
+      return 5
+    end
+  else
+    if self.state == "walk" then
+      if self.lookRight == true then
+        return 7
+      else
+        return 6
+      end
+    elseif self.state == "heavy" then
+      if self.lookRight == true then
+        return 1
+      else
+        return 0
+      end
+    elseif self.state == "step" then
+      if self.lookRight == true then
+        return 3
+      else
+        return 2
+      end
+    elseif self.state == "forward" then
+      return 5
+    elseif self.state == "back" then
+      return 4
+    end
   end
 end
 
 function Sausage:getBox()
-  if self.state == "heavy" then
-    return self.sausageImg:getWidth(), self.sausageImg:getHeight()
-  else
-    return self.sausageImg:getWidth()/2, self.sausageImg:getHeight()
-  end
+  --if self.state == "heavy" then
+    return sausageSize, sausageSize
+  --else
+  --  return sausageSize/2, sausageSize
+  --end
 end
 
 function Sausage:getBoundingBox()
