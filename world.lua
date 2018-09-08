@@ -28,8 +28,8 @@ function World:__init(width, height, level)
 end
 
 function World:update(dt)
-  self.player1:update(dt)
-  self.player2:update(dt)
+  self.player1:update(dt, self.player2)
+  self.player2:update(dt, self.player1)
 end
 
 function World:draw()
@@ -43,7 +43,15 @@ function World:draw()
 end
 
 function World:keyreleased(key)
-
+  if key == "a" then
+    self.player1:pressLeft(self.player2)
+  elseif key == "s" then
+    self.player1:pressRight(self.player2)
+  elseif key == "k" then
+    self.player2:pressLeft(self.player1)
+  elseif key == "l" then
+    self.player2:pressRight(self.player1)
+  end
 end
 
 function World:keypressed(key, scancode, isrepeat)
