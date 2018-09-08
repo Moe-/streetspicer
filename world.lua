@@ -7,6 +7,9 @@ class "World" {
 
 gBorder = 256
 
+gBackgroundFrying = love.audio.newSource("sfx/background.ogg", "static")
+gBackgroundMusic = love.audio.newSource("sfx/music.ogg", "static")
+
 function World:__init(width, height)
 	self.screenWidth = width
 	self.screenHeight = height
@@ -16,7 +19,10 @@ function World:__init(width, height)
   self.targetRight1 = {self.screenWidth - gBorder / 2, 5 * self.screenHeight / 6}
   self.targetRight2 = {self.screenWidth, 2 * self.screenHeight / 3}
 	
-	--love.audio.play(gBackgroundMusic)
+  gBackgroundFrying:setLooping(true)
+	love.audio.play(gBackgroundFrying)
+  gBackgroundMusic:setLooping(true)
+	love.audio.play(gBackgroundMusic)
 	
   self.lifesPlayer1 = 3
   self.lifesPlayer2 = 3
