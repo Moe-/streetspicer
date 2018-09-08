@@ -18,6 +18,12 @@ function World:__init(width, height)
   self.backgroundImg = love.graphics.newImage("gfx/BG.png")
   self.backgroundQuad = love.graphics.newQuad(0, 0, self.backgroundImg:getWidth(), self.backgroundImg:getHeight(), self.backgroundImg:getWidth(), self.backgroundImg:getHeight())
   
+  self.hotSauceImg = love.graphics.newImage("gfx/HotSauce.png")
+  self.hotSauceQuad = love.graphics.newQuad(0, 0, self.hotSauceImg:getWidth(), self.hotSauceImg:getHeight(), self.hotSauceImg:getWidth(), self.hotSauceImg:getHeight())
+  
+  self.sauceImg = love.graphics.newImage("gfx/Splatter.png")
+  self.sauceQuad = love.graphics.newQuad(0, 0, self.sauceImg:getWidth(), self.sauceImg:getHeight(), self.sauceImg:getWidth(), self.sauceImg:getHeight())
+  
   self.targetLeft1 = {3 * gBorder / 4, 5 * self.screenHeight / 6 - 32}
   self.targetLeft2 = {0, 2 * self.screenHeight / 3}
   self.targetRight1 = {self.screenWidth - 3 * gBorder / 4, 5 * self.screenHeight / 6 - 32}
@@ -32,6 +38,8 @@ function World:__init(width, height)
   self.lifesPlayer2 = 3
   
   self.animFactor = 1
+  
+  self.showSauce = 0
   
   self.stageImg = love.graphics.newImage("gfx/stage.png")
   self.stage = love.graphics.newQuad(0, 0, self.stageImg:getWidth(), self.stageImg:getHeight(), self.stageImg:getWidth(), self.stageImg:getHeight())
@@ -110,10 +118,12 @@ function World:update(dt)
   elseif self.gameState == "p1_lost_life_plate" then
     if self.player1:moveToPos(self.target1) then
       self.gameState = "p1_lost_life_out"
+      self.showSauce = 10
     end
   elseif self.gameState == "p2_lost_life_plate" then
     if self.player2:moveToPos(self.target1) then
       self.gameState = "p2_lost_life_out"
+      self.showSauce = 10
     end
   elseif self.gameState == "p1_lost_life_out" then
     self.plate1:moveBy(self.animFactor * 4, -4)
@@ -153,11 +163,20 @@ function World:draw()
   --love.graphics.draw(self.stageImg, self.stage, 0, 2 * self.screenHeight / 3)
   love.graphics.draw(self.backgroundImg, self.backgroundQuad, 0, 0)
   
+  love.graphics.draw(self.hotSauceImg, self.hotSauceQuad, 128, self.screenHeight/2)
+  love.graphics.draw(self.hotSauceImg, self.hotSauceQuad, self.screenWidth - 256, self.screenHeight/2)
+  
   self.plate1:draw()
   self.plate2:draw()
   
   self.player1:draw()
   self.player2:draw()
+  
+  if self.showSauce > 0 then
+    love.graphics.draw(self.sauceImg, self.sauceQuad, 128 + 32, self.screenHeight/2 + 256)
+    love.graphics.draw(self.sauceImg, self.sauceQuad, self.screenWidth - 256 + 32, self.screenHeight/2 + 256)
+    self.showSauce = self.showSauce - 1
+  end
   
   if self.gameState == "p1_wins" then
     love.graphics.setColor(gMenuColor, 255 - gMenuColor, 0, 255)
