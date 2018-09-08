@@ -30,6 +30,39 @@ end
 function World:update(dt)
   self.player1:update(dt, self.player2)
   self.player2:update(dt, self.player1)
+  
+  p1_box = {self.player1:getBoundingBox()}
+  p2_box = {self.player2:getBoundingBox()}
+  
+  c1 = {self.player1:getBoundingCircle()}
+  c2 = {self.player2:getBoundingCircle()}
+  print(c1[1], c1[2], c1[3], c2[1], c2[2], c2[3], getDistance(c1[1], c1[2], c2[1], c2[2]), (c1[3] + c2[3])/2)
+  if getDistance(c1[1], c1[2], c2[1], c2[2]) < (c1[3] + c2[3])/2 then
+    state1, substate1, time1 = self.player1:getAction()
+    state2, substate2, time2 = self.player2:getAction()
+    if substate1 == "active" and substate2 == "active" then
+      if time1 < time2 then
+        self.player2:hit(state1)
+      elseif time1 > time2 then
+        self.player1:hit(state2)
+      else
+        self.player2:hit(state1)
+        self.player1:hit(state2)
+      end
+    elseif substate1 == "active" then
+      self.player2:hit(state1)
+    elseif substate2 == "active" then
+      self.player1:hit(state2)
+    end
+  end
+  
+end
+
+function World:checkInside(px, py, box)
+  if px > box[1] and px < box[3] and py > box[2] and py < box[4] then
+    return true
+  end
+  return false
 end
 
 function World:draw()

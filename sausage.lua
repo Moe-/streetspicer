@@ -15,6 +15,7 @@ function Sausage:__init(posX, posY, player)
   self.substate = "none"
   self.substateIdx = -1
   self.subframes = 0
+  self.pushback = 0
   
   if player == 1 then
     self.sausageImg = love.graphics.newImage("gfx/sausage_white.png")
@@ -32,11 +33,12 @@ function Sausage:__init(posX, posY, player)
 end
 
 function Sausage:update(dt, enemy)
+  factor = -1.0
+  if self.lookRight then
+    factor = 1.0
+  end
+  
   if self.state ~= "walk" then
-    factor = -1.0
-    if self.lookRight then
-      factor = 1.0
-    end
     while self.subframes <= 0 do
       if self.substate == "none" then
         self.substate = "startup"
@@ -70,6 +72,13 @@ function Sausage:update(dt, enemy)
       self.subframes = idleFrames
     end
   end
+  
+  if self.pushback > 0 then
+    diff = math.max(5, math.floor(self.pushback * 0.25))
+    self.pushback = self.pushback - diff
+    self.posX = self.posX - factor * diff
+  end
+  
   self.subframes = self.subframes - 1
 end
 
@@ -93,6 +102,7 @@ function Sausage:pressLeft(enemy)
       self.phases = BackPhases
     end
     self.subframes = 0
+    self.actionTime = love.timer.getTime()
   end
   --self.posX = self.posX - 32
 end
@@ -117,6 +127,7 @@ function Sausage:pressRight(enemy)
       self.phases = BackPhases
     end
     self.subframes = 0
+    self.actionTime = love.timer.getTime()
   end
   --self.posX = self.posX + 32
 end
@@ -141,5 +152,29 @@ function Sausage:getBox()
 end
 
 function Sausage:getBoundingBox()
-  return self.posX, self.posY, self:getBox()
+  w, h = self:getBox()
+  return self.posX, self.posY, self.posX + w, self.posY + h
+end
+
+function Sausage:getBoundingCircle()
+  w, h = self:getBox()
+  r = math.sqrt(w*w + h * h)
+  return self.posX, self.posY, r
+end
+
+function Sausage:getAction()
+  return self.state, self.substate, self.actionTime
+end
+
+function Sausage:hit(state)
+  if state == "heavy" then
+    self.pushback = 20
+  elseif state == "step" then
+    self.pushback = 5
+  elseif state == "forward" then
+    self.pushback = 15
+  elseif state == "back" then
+    self.pushback = 10
+  end
+  print("Hit ", state)
 end
