@@ -61,9 +61,13 @@ function World:updateGame(dt)
     end
   end
   
-  if c1[1] < gBorder or c1[1] > self.screenWidth - gBorder then
+  b1 = {self.player1:getBox()}
+  b2 = {self.player2:getBox()}
+  x1 = c1[1] - b1[1] / 2
+  x2 = c2[1] - b2[1] / 2
+  if x1 < gBorder or x1 > self.screenWidth - gBorder then
     self.gameState = "p1_lost_life_plate"
-    if c1[1] < gBorder then
+    if x1 < gBorder then
       self.target1 = self.targetLeft1
       self.target2 = self.targetLeft2
     else
@@ -71,9 +75,9 @@ function World:updateGame(dt)
       self.target2 = self.targetRight2
     end
     print("Player 1 lost")
-  elseif c2[1] < gBorder or c2[1] > self.screenWidth - gBorder then
+  elseif x2 < gBorder or x2 > self.screenWidth - gBorder then
     self.gameState = "p2_lost_life_plate"
-    if c2[1] < gBorder then
+    if x2 < gBorder then
       self.target1 = self.targetLeft1
       self.target2 = self.targetLeft2
     else
