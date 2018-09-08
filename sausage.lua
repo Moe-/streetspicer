@@ -4,6 +4,11 @@ class "Sausage" {
   state = "walk";
 }
 
+gSoundHit1 = love.audio.newSource("sfx/hit1.ogg", "static")
+gSoundHit2 = love.audio.newSource("sfx/hit2.wav", "static")
+gSoundHit3 = love.audio.newSource("sfx/hit3.wav", "static")
+gSoundKick = love.audio.newSource("sfx/strong_kick.wav", "static")
+
 -- entry: length, x-delta mov, y-delta mov
 StepPhases = {{2, -2, 0}, {0, -2, 0}, {2, -2, 0}}
 BackPhases = {{3, -2, -8}, {3, 0, 0}, {3, 2, 8}}
@@ -16,6 +21,11 @@ function Sausage:__init(posX, posY, player)
   self.substateIdx = -1
   self.subframes = 0
   self.pushback = 0
+  
+  gSoundHit1:setLooping(false)
+  gSoundHit2:setLooping(false)
+  gSoundHit3:setLooping(false)
+  gSoundKick:setLooping(false)
   
   if player == 1 then
     self.sausageImg = love.graphics.newImage("gfx/sausage_white.png")
@@ -169,12 +179,16 @@ end
 function Sausage:hit(state)
   if state == "heavy" then
     self.pushback = 20
+    love.audio.play(gSoundKick)
   elseif state == "step" then
     self.pushback = 5
+    love.audio.play(gSoundHit1)
   elseif state == "forward" then
     self.pushback = 15
+    love.audio.play(gSoundHit3)
   elseif state == "back" then
     self.pushback = 10
+    love.audio.play(gSoundHit2)
   end
 end
 
