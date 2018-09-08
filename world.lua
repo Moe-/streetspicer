@@ -5,29 +5,35 @@ class "World" {
 	screenHeight = 0;
 }
 
-gTileSize = 64
+gBorder = 256
 
-gLevelsets = {
-
-}
-
-function World:__init(width, height, level)
-	self.screenWidth = width;
-	self.screenHeight = height;
+function World:__init(width, height)
+	self.screenWidth = width
+	self.screenHeight = height
+  
+  self.targetLeft1 = {gBorder / 2, 5 * self.screenHeight / 6}
+  self.targetLeft2 = {0, 2 * self.screenHeight / 3}
+  self.targetRight1 = {self.screenWidth - gBorder / 2, 5 * self.screenHeight / 6}
+  self.targetRight2 = {self.screenWidth, 2 * self.screenHeight / 3}
 	
 	--love.audio.play(gBackgroundMusic)
 	
-	self.gameState = "alive"
+  self.lifesPlayer1 = 3
+  self.lifesPlayer2 = 3
   
   self.stageImg = love.graphics.newImage("gfx/stage.png")
   self.stage = love.graphics.newQuad(0, 0, self.stageImg:getWidth(), self.stageImg:getHeight(), self.stageImg:getWidth(), self.stageImg:getHeight())
   
+  self:reset()
+end  
+
+function World:reset()
+  self.gameState = "alive"
   self.player1 = Sausage:new(640, 2 * self.screenHeight / 3, 1)
   self.player2 = Sausage:new(1280, 2 * self.screenHeight / 3, 2)
-
 end
 
-function World:update(dt)
+function World:updateGame(dt)
   self.player1:update(dt, self.player2)
   self.player2:update(dt, self.player1)
   
@@ -36,7 +42,6 @@ function World:update(dt)
   
   c1 = {self.player1:getBoundingCircle()}
   c2 = {self.player2:getBoundingCircle()}
-  print(c1[1], c1[2], c1[3], c2[1], c2[2], c2[3], getDistance(c1[1], c1[2], c2[1], c2[2]), (c1[3] + c2[3])/2)
   if getDistance(c1[1], c1[2], c2[1], c2[2]) < (c1[3] + c2[3])/2 then
     state1, substate1, time1 = self.player1:getAction()
     state2, substate2, time2 = self.player2:getAction()
@@ -56,6 +61,61 @@ function World:update(dt)
     end
   end
   
+  if c1[1] < gBorder or c1[1] > self.screenWidth - gBorder then
+    self.gameState = "p1_lost_life_plate"
+    if c1[1] < gBorder then
+      self.target1 = self.targetLeft1
+      self.target2 = self.targetLeft2
+    else
+      self.target1 = self.targetRight1
+      self.target2 = self.targetRight2
+    end
+    print("Player 1 lost")
+  elseif c2[1] < gBorder or c2[1] > self.screenWidth - gBorder then
+    self.gameState = "p2_lost_life_plate"
+    if c2[1] < gBorder then
+      self.target1 = self.targetLeft1
+      self.target2 = self.targetLeft2
+    else
+      self.target1 = self.targetRight1
+      self.target2 = self.targetRight2
+    end
+    print("Player 2 lost")
+  end
+end
+
+function World:update(dt)
+  if self.gameState == "alive" then
+    self:updateGame(dt)
+  elseif self.gameState == "p1_lost_life_plate" then
+    if self.player1:moveToPos(self.target1) then
+      self.gameState = "p1_lost_life_out"
+    end
+  elseif self.gameState == "p2_lost_life_plate" then
+    if self.player2:moveToPos(self.target1) then
+      self.gameState = "p2_lost_life_out"
+    end
+  elseif self.gameState == "p1_lost_life_out" then
+    if self.player1:moveToPos(self.target2) then
+      self.lifesPlayer1 = self.lifesPlayer1 - 1
+      if self.lifesPlayer1 < 1 then
+        self.gameState = "p2_wins"
+      else
+        self.gameState = "alive"
+        self:reset()
+      end
+    end
+  elseif self.gameState == "p2_lost_life_out" then
+    if self.player2:moveToPos(self.target2) then
+      self.lifesPlayer2 = self.lifesPlayer2 - 1
+      if self.lifesPlayer2 < 1 then
+        self.gameState = "p1_wins"
+      else
+        self.gameState = "alive"
+        self:reset()
+      end
+    end
+  end
 end
 
 function World:checkInside(px, py, box)
@@ -72,18 +132,35 @@ function World:draw()
   
   self.player1:draw()
   self.player2:draw()
-	
+  
+  if self.gameState == "p1_wins" then
+    love.graphics.setColor(gMenuColor, 255 - gMenuColor, 0, 255)
+    love.graphics.print("Player 1 wins", 2*self.screenWidth/5, self.screenHeight/4, 0, 4, 4)
+  elseif self.gameState == "p2_wins" then
+    love.graphics.setColor(gMenuColor, 255 - gMenuColor, 0, 255)
+    love.graphics.print("Player 2 wins", 2*self.screenWidth/5, self.screenHeight/4, 0, 4, 4)
+  else
+    for i = 1, self.lifesPlayer1 do
+      love.graphics.draw(self.player1.sausageImg, self.player1.sausageQuad, self.screenWidth/6 + i * 150, 50)
+    end
+    for i = self.lifesPlayer2, 1, -1 do
+      love.graphics.draw(self.player2.sausageImg, self.player2.sausageQuad, 5 * self.screenWidth/6 - i * 150, 50, 0, -1, 1)
+    end
+  end
 end
 
 function World:keyreleased(key)
-  if key == "a" then
-    self.player1:pressLeft(self.player2)
-  elseif key == "s" then
-    self.player1:pressRight(self.player2)
-  elseif key == "k" then
-    self.player2:pressLeft(self.player1)
-  elseif key == "l" then
-    self.player2:pressRight(self.player1)
+  
+  if self.gameState == "alive" then
+    if key == "a" then
+      self.player1:pressLeft(self.player2)
+    elseif key == "s" then
+      self.player1:pressRight(self.player2)
+    elseif key == "k" then
+      self.player2:pressLeft(self.player1)
+    elseif key == "l" then
+      self.player2:pressRight(self.player1)
+    end
   end
 end
 

@@ -176,5 +176,21 @@ function Sausage:hit(state)
   elseif state == "back" then
     self.pushback = 10
   end
-  print("Hit ", state)
+end
+
+function Sausage:moveToPos(pos)
+  factor = 8
+  dx = pos[1] - self.posX
+  dy = pos[2] - self.posY
+  length = getLength(dx, dy)
+  dx = dx / length
+  dy = dy / length
+  self.posX = self.posX + factor * dx
+  self.posY = self.posY + factor * dy
+  if getDistance(pos[1], pos[2], self.posX, self.posY) < 16 then
+    self.posX = pos[1]
+    self.posY = pos[2]
+    return true
+  end
+  return false
 end

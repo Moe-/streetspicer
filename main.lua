@@ -16,16 +16,15 @@ function love.load()
 end
 
 function love.update(dt)
-	if gGameState == 0 then
-		gMenuColor = gMenuColor + gMenuDir
-		if gMenuColor > 255 then
-			gMenuColor = 255
-			gMenuDir = -1
-		elseif gMenuColor < 0 then
-			gMenuColor = 0
-			gMenuDir = 0
-		end
-	elseif gGameState == 1 then
+  gMenuColor = gMenuColor + gMenuDir
+  if gMenuColor > 255 then
+    gMenuColor = 255
+    gMenuDir = -1
+  elseif gMenuColor < 0 then
+    gMenuColor = 0
+    gMenuDir = 0
+  end
+	if gGameState == 1 then
 		gWorld:update(dt)
 	end
 end
